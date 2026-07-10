@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smash or Pass — Bankr launches on Robinhood Chain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --lime:#ccff06;
+  --lime-dim:rgba(204,255,6,.14);
+  --red:#ff4d5e;
+  --red-dim:rgba(255,77,94,.12);
+  --bg:#0a0c08;
+  --card:#12150e;
+  --card-edge:rgba(204,255,6,.14);
+  --ink:#f2f5ea;
+  --muted:#9aa38b;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{
+  font-family:'Fredoka',sans-serif;color:var(--ink);min-height:100vh;
+  background:
+    radial-gradient(900px 500px at 85% -10%, rgba(204,255,6,.07), transparent 60%),
+    radial-gradient(700px 500px at -10% 110%, rgba(204,255,6,.05), transparent 60%),
+    var(--bg);
+}
+header{
+  position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+  background:rgba(10,12,8,.82);border-bottom:1px solid var(--card-edge);
+}
+.bar{max-width:1180px;margin:0 auto;padding:14px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:baseline;gap:10px}
+.logo h1{font-size:1.35rem;font-weight:700;letter-spacing:.5px}
+.logo h1 .s{color:var(--lime)}
+.logo h1 .p{color:var(--red)}
+.sub{font-size:.72rem;color:var(--muted);font-family:var(--mono);letter-spacing:.4px}
+.spacer{flex:1}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.72rem;
+  border:1px solid var(--card-edge);border-radius:999px;padding:7px 13px;color:var(--muted);
+  background:rgba(255,255,255,.02);cursor:pointer;user-select:none;transition:.15s;
+}
+.pill:hover{border-color:rgba(204,255,6,.4)}
+.pill.on{color:var(--lime);border-color:rgba(204,255,6,.5);background:var(--lime-dim)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.pill.on .dot{background:var(--lime);box-shadow:0 0 8px var(--lime)}
+#statusPill{cursor:default}
+#statusPill .dot{background:var(--lime);box-shadow:0 0 8px var(--lime);animation:pulse 2s infinite}
+#statusPill.err .dot{background:var(--red);box-shadow:0 0 8px var(--red);animation:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+main{max-width:1180px;margin:0 auto;padding:26px 18px 80px}
+.meta-row{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.meta-row .note{font-size:.78rem;color:var(--muted)}
+select{
+  font-family:var(--mono);font-size:.72rem;background:rgba(255,255,255,.02);color:var(--muted);
+  border:1px solid var(--card-edge);border-radius:999px;padding:7px 12px;outline:none;cursor:pointer;
+}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+.card{
+  position:relative;background:var(--card);border:1px solid var(--card-edge);border-radius:18px;
+  padding:18px;overflow:hidden;animation:rise .35s ease both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card.smash{border-color:rgba(204,255,6,.35)}
+.card.pass{border-color:rgba(255,77,94,.28)}
+.card .top{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+.tok-img{width:44px;height:44px;border-radius:12px;background:#1c2116;object-fit:cover;flex:none;border:1px solid var(--card-edge)}
+.tok-img.ph{display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--lime);font-size:1.1rem}
+.tok-name{min-width:0}
+.tok-name .sym{font-weight:700;font-size:1.15rem;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tok-name .nm{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono)}
+.badges{margin-left:auto;display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex:none}
+.badge{font-family:var(--mono);font-size:.6rem;letter-spacing:.6px;border-radius:6px;padding:3px 7px}
+.badge.bankr{color:#0a0c08;background:var(--lime);font-weight:800}
+.badge.unk{color:var(--muted);border:1px solid var(--card-edge)}
+.badge.age{color:var(--muted);border:1px solid var(--card-edge)}
+.stamp{
+  position:absolute;top:54px;right:-6px;transform:rotate(12deg) scale(1);
+  font-weight:800;font-size:1.5rem;letter-spacing:2px;padding:4px 14px;border-radius:8px;
+  border:3px solid;opacity:.92;pointer-events:none;font-family:var(--mono);
+  animation:slam .32s cubic-bezier(.2,1.6,.4,1) both;mix-blend-mode:screen;
+}
+@keyframes slam{from{transform:rotate(18deg) scale(2.1);opacity:0}to{transform:rotate(12deg) scale(1);opacity:.92}}
+.stamp.smash{color:var(--lime);border-color:var(--lime);text-shadow:0 0 18px rgba(204,255,6,.5)}
+.stamp.pass{color:var(--red);border-color:var(--red);text-shadow:0 0 18px rgba(255,77,94,.5)}
+.scorebar{height:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden;margin:6px 0 14px}
+.scorebar i{display:block;height:100%;border-radius:99px;transition:width .5s ease}
+.card.smash .scorebar i{background:linear-gradient(90deg,#7ab800,var(--lime))}
+.card.pass .scorebar i{background:linear-gradient(90deg,#8a2530,var(--red))}
+.score-label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--muted)}
+.score-label b{color:var(--ink)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:12px}
+.stat .k{font-size:.62rem;color:var(--muted);font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase}
+.stat .v{font-family:var(--mono);font-weight:600;font-size:.88rem}
+.v.up{color:var(--lime)}.v.down{color:var(--red)}
+.reasons{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.reason{display:flex;gap:8px;align-items:baseline;font-size:.78rem;color:var(--muted)}
+.reason .ic{font-family:var(--mono);font-weight:800;flex:none}
+.reason.good .ic{color:var(--lime)}
+.reason.bad .ic{color:var(--red)}
+.ca{
+  display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.68rem;color:var(--muted);
+  border:1px solid var(--card-edge);border-radius:10px;padding:7px 10px;cursor:pointer;margin-bottom:12px;
+  background:rgba(255,255,255,.02);transition:.15s;
+}
+.ca:hover{border-color:rgba(204,255,6,.4);color:var(--ink)}
+.ca .addr{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.links{display:flex;gap:8px}
+.lnk{
+  flex:1;text-align:center;text-decoration:none;font-family:var(--mono);font-size:.7rem;font-weight:600;
+  padding:9px 0;border-radius:10px;border:1px solid var(--card-edge);color:var(--ink);transition:.15s;
+}
+.lnk:hover{border-color:var(--lime);color:var(--lime)}
+.lnk.primary{background:var(--lime);color:#0a0c08;border-color:var(--lime)}
+.lnk.primary:hover{filter:brightness(1.08);color:#0a0c08}
+.empty,.loading{
+  text-align:center;color:var(--muted);padding:70px 20px;font-size:.9rem;border:1px dashed var(--card-edge);
+  border-radius:18px;font-family:var(--mono);
+}
+footer{max-width:1180px;margin:0 auto;padding:0 18px 40px;font-size:.68rem;color:var(--muted);font-family:var(--mono);line-height:1.7;text-align:center}
+@media(max-width:640px){
+  .grid{grid-template-columns:1fr}
+  .logo h1{font-size:1.1rem}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header><div class="bar">
+  <div class="logo">
+    <h1><span class="s">SMASH</span> or <span class="p">PASS</span></h1>
+    <span class="sub">bankr launches · robinhood chain</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="pill on" id="bankrToggle"><span class="dot"></span>BANKR ONLY</div>
+  <div class="pill" id="statusPill"><span class="dot"></span><span id="statusTxt">connecting…</span></div>
+</div></header>
+
+<main>
+  <div class="meta-row">
+    <select id="sortSel">
+      <option value="new">Sort: newest</option>
+      <option value="score">Sort: score</option>
+      <option value="vol">Sort: 1h volume</option>
+      <option value="liq">Sort: liquidity</option>
+    </select>
+    <select id="minLiqSel">
+      <option value="0">Min liq: any</option>
+      <option value="1000" selected>Min liq: $1k</option>
+      <option value="5000">Min liq: $5k</option>
+      <option value="20000">Min liq: $20k</option>
+    </select>
+    <span class="note" id="countNote"></span>
+  </div>
+  <div id="feed"><div class="loading">scanning new pools on robinhood chain…</div></div>
+</main>
+
+<footer>
+  data: GeckoTerminal + Robinhood Chain Blockscout · refreshes every 45s<br>
+  vibes-based heuristics on public pool data — not financial advice, memecoins can and will go to zero
+</footer>
+
+<script>
+(() => {
+const GT = 'https://api.geckoterminal.com/api/v2';
+const BS = 'https://robinhoodchain.blockscout.com/api/v2';
+const NETWORK = 'robinhood';
+// Known Bankr-launched token on RH chain ($BURGERS) — used to learn the Bankr factory address
+const KNOWN_BANKR_TOKEN = '0xf796e42ea375bcd592c892fe64968ba06188bba3';
+const REFRESH_MS = 45000;
+
+const feed = document.getElementById('feed');
+const statusPill = document.getElementById('statusPill');
+const statusTxt = document.getElementById('statusTxt');
+const countNote = document.getElementById('countNote');
+const bankrToggle = document.getElementById('bankrToggle');
+const sortSel = document.getElementById('sortSel');
+const minLiqSel = document.getElementById('minLiqSel');
+
+let bankrOnly = true;
+let bankrDeployers = new Set();          // learned factory/deployer fingerprints
+let creatorCache = loadJSON('sop:creators:v2') || {}; // token addr -> creator addr ('' = unknown)
+let pools = [];                          // last processed pool list
+let refreshTimer = null;
+
+bankrToggle.onclick = () => { bankrOnly = !bankrOnly; bankrToggle.classList.toggle('on', bankrOnly); render(); };
+sortSel.onchange = render;
+minLiqSel.onchange = render;
+
+function loadJSON(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch{ return null; } }
+function saveJSON(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
+
+function setStatus(txt, err=false){ statusTxt.textContent = txt; statusPill.classList.toggle('err', err); }
+
+const fmtUsd = n => {
+  n = Number(n);
+  if(!isFinite(n)) return '—';
+  if(n >= 1e9) return '$'+(n/1e9).toFixed(2)+'B';
+  if(n >= 1e6) return '$'+(n/1e6).toFixed(2)+'M';
+  if(n >= 1e3) return '$'+(n/1e3).toFixed(1)+'k';
+  return '$'+n.toFixed(n < 1 ? 4 : 0);
+};
+const fmtAge = iso => {
+  const s = (Date.now() - new Date(iso).getTime())/1000;
+  if(s < 60) return Math.floor(s)+'s';
+  if(s < 3600) return Math.floor(s/60)+'m';
+  if(s < 86400) return Math.floor(s/3600)+'h '+Math.floor((s%3600)/60)+'m';
+  return Math.floor(s/86400)+'d';
+};
+
+// ---------- Bankr fingerprint ----------
+async function getCreator(tokenAddr){
+  tokenAddr = tokenAddr.toLowerCase();
+  if(tokenAddr in creatorCache) return creatorCache[tokenAddr];
+  try{
+    const r = await fetch(`${BS}/addresses/${tokenAddr}`);
+    if(!r.ok) throw 0;
+    const j = await r.json();
+    const c = (j.creator_address_hash || '').toLowerCase();
+    creatorCache[tokenAddr] = c;
+    saveJSON('sop:creators:v2', creatorCache);
+    return c;
+  }catch{
+    return null; // transient failure — don't cache
+  }
+}
+
+async function learnBankrFingerprint(){
+  const saved = loadJSON('sop:bankrDeployers:v1');
+  if(saved && saved.length){ bankrDeployers = new Set(saved); return; }
+  const c = await getCreator(KNOWN_BANKR_TOKEN);
+  if(c){ bankrDeployers.add(c); saveJSON('sop:bankrDeployers:v1', [...bankrDeployers]); }
+}
+
+// ---------- Scoring ----------
+function scorePool(a){
+  const liq = Number(a.reserve_in_usd) || 0;
+  const fdv = Number(a.fdv_usd) || 0;
+  const vol1 = Number(a.volume_usd?.h1) || 0;
+  const tx1 = a.transactions?.h1 || {};
+  const buys = tx1.buys||0, sells = tx1.sells||0, buyers = tx1.buyers||0;
+  const chg1 = parseFloat(a.price_change_percentage?.h1);
+  const ageMin = (Date.now() - new Date(a.pool_created_at).getTime())/60000;
+
+  let score = 50;
+  const reasons = [];
+  const add = (pts, good, txt) => { score += pts; reasons.push({good, txt, pts:Math.abs(pts)}); };
+
+  // Liquidity
+  if(liq < 500) add(-30, false, `Dust liquidity (${fmtUsd(liq)}) — rug tier`);
+  else if(liq < 2000) add(-10, false, `Thin liquidity (${fmtUsd(liq)})`);
+  else if(liq < 10000) add(12, true, `Decent liquidity (${fmtUsd(liq)})`);
+  else add(22, true, `Strong liquidity (${fmtUsd(liq)})`);
+
+  // Buy pressure
+  const totTx = buys + sells;
+  if(totTx >= 5){
+    const bp = buys/totTx;
+    if(bp >= 0.65) add(15, true, `Buy pressure ${(bp*100).toFixed(0)}% (${buys}B/${sells}S last hr)`);
+    else if(bp <= 0.35) add(-15, false, `Sellers in control (${buys}B/${sells}S last hr)`);
+    else add(4, true, `Balanced flow (${buys}B/${sells}S last hr)`);
+  } else {
+    add(-8, false, `Barely any trades (${totTx} in last hr)`);
+  }
+
+  // Unique buyers
+  if(buyers >= 15) add(10, true, `${buyers} unique buyers last hr`);
+  else if(buyers >= 6) add(5, true, `${buyers} unique buyers last hr`);
+  if(buys >= 10 && buyers > 0 && buyers/buys < 0.3) add(-12, false, `Few wallets doing most buys — wash-y`);
+
+  // Volume vs liquidity
+  if(liq > 0){
+    const r = vol1/liq;
+    if(r >= 0.3 && r <= 5) add(10, true, `Healthy 1h volume (${fmtUsd(vol1)})`);
+    else if(r > 15) add(-10, false, `Volume ${r.toFixed(0)}x liquidity — churn alert`);
+    else if(vol1 < 100) add(-6, false, `Dead volume (${fmtUsd(vol1)}/hr)`);
+  }
+
+  // Price action
+  if(isFinite(chg1)){
+    if(chg1 <= -50) add(-25, false, `Down ${chg1.toFixed(0)}% in 1h — dumping`);
+    else if(chg1 < -20) add(-10, false, `Bleeding (${chg1.toFixed(0)}% 1h)`);
+    else if(chg1 >= 0 && chg1 <= 150) add(10, true, `Grinding up (+${chg1.toFixed(0)}% 1h)`);
+    else if(chg1 > 500) add(-8, false, `+${chg1.toFixed(0)}% already — you're late`);
+    else if(chg1 > 150) add(4, true, `Ripping (+${chg1.toFixed(0)}% 1h)`);
+  }
+
+  // FDV sanity vs liquidity
+  if(fdv > 0 && liq > 0){
+    const r = fdv/liq;
+    if(r > 500) add(-14, false, `FDV ${r.toFixed(0)}x liquidity — thin exit`);
+    else if(r < 50) add(8, true, `FDV/liq ratio looks sane (${r.toFixed(0)}x)`);
+  }
+
+  // Freshness
+  if(ageMin < 15 && totTx >= 10) add(5, true, `Fresh launch already active (${fmtAge(a.pool_created_at)})`);
+
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  reasons.sort((x,y) => y.pts - x.pts);
+  return { score, verdict: score >= 55 ? 'SMASH' : 'PASS', reasons: reasons.slice(0,4) };
+}
+
+// ---------- Fetch & process ----------
+async function fetchNewPools(){
+  const urls = [1,2].map(p => `${GT}/networks/${NETWORK}/new_pools?include=base_token&page=${p}`);
+  const results = await Promise.allSettled(urls.map(u => fetch(u).then(r => r.ok ? r.json() : Promise.reject(r.status))));
+  const data = [], included = [];
+  for(const r of results){
+    if(r.status === 'fulfilled'){ data.push(...(r.value.data||[])); included.push(...(r.value.included||[])); }
+  }
+  if(!data.length) throw new Error('no data');
+
+  const tokens = {};
+  for(const t of included) if(t.type === 'token') tokens[t.id] = t.attributes;
+
+  const seen = new Set(), out = [];
+  for(const p of data){
+    const a = p.attributes;
+    const btId = p.relationships?.base_token?.data?.id || '';
+    const tok = tokens[btId] || {};
+    const tokenAddr = (tok.address || btId.replace(NETWORK+'_','')).toLowerCase();
+    if(!tokenAddr || seen.has(tokenAddr)) continue;
+    seen.add(tokenAddr);
+    out.push({
+      poolAddr: a.address, tokenAddr,
+      symbol: tok.symbol || (a.name||'?').split(' /')[0],
+      name: tok.name || '', img: tok.image_url && tok.image_url !== 'missing.png' ? tok.image_url : null,
+      attrs: a, ...scorePool(a),
+      creator: creatorCache[tokenAddr] ?? null,
+    });
+  }
+  return out;
+}
+
+async function resolveCreators(list){
+  // look up creators for uncached tokens, few at a time, re-render as they land
+  const pending = list.filter(p => p.creator === null || p.creator === undefined);
+  const CHUNK = 4;
+  for(let i = 0; i < pending.length; i += CHUNK){
+    await Promise.all(pending.slice(i, i+CHUNK).map(async p => {
+      p.creator = await getCreator(p.tokenAddr);
+    }));
+    render();
+  }
+}
+
+function isBankr(p){
+  if(!bankrDeployers.size) return null;           // fingerprint unknown
+  if(p.creator === null || p.creator === undefined) return null; // still resolving
+  return bankrDeployers.has(p.creator);
+}
+
+// ---------- Render ----------
+function render(){
+  let list = [...pools];
+  const minLiq = Number(minLiqSel.value);
+  list = list.filter(p => (Number(p.attrs.reserve_in_usd)||0) >= minLiq);
+  if(bankrOnly && bankrDeployers.size) list = list.filter(p => isBankr(p) !== false);
+
+  const sort = sortSel.value;
+  if(sort === 'score') list.sort((a,b) => b.score - a.score);
+  else if(sort === 'vol') list.sort((a,b) => (b.attrs.volume_usd?.h1||0) - (a.attrs.volume_usd?.h1||0));
+  else if(sort === 'liq') list.sort((a,b) => (b.attrs.reserve_in_usd||0) - (a.attrs.reserve_in_usd||0));
+  else list.sort((a,b) => new Date(b.attrs.pool_created_at) - new Date(a.attrs.pool_created_at));
+
+  const smashes = list.filter(p => p.verdict==='SMASH').length;
+  countNote.textContent = list.length ? `${list.length} launches · ${smashes} smash / ${list.length - smashes} pass` : '';
+
+  if(!list.length){
+    feed.innerHTML = `<div class="empty">no launches match your filters right now — the chain is quiet or your bar is high</div>`;
+    return;
+  }
+
+  feed.innerHTML = '<div class="grid">' + list.map(cardHTML).join('') + '</div>';
+
+  // wire copy pills
+  feed.querySelectorAll('.ca').forEach(el => {
+    el.onclick = () => {
+      navigator.clipboard.writeText(el.dataset.addr).then(() => {
+        const t = el.querySelector('.addr'); const old = t.textContent;
+        t.textContent = 'copied ✓'; setTimeout(() => t.textContent = old, 1200);
+      });
+    };
+  });
+}
+
+function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function cardHTML(p){
+  const a = p.attrs;
+  const cls = p.verdict === 'SMASH' ? 'smash' : 'pass';
+  const chg1 = parseFloat(a.price_change_percentage?.h1);
+  const bk = isBankr(p);
+  const bankrBadge = bk === true ? '<span class="badge bankr">BANKR</span>'
+                   : bk === null ? '<span class="badge unk">CHECKING…</span>'
+                   : '<span class="badge unk">NOT BANKR</span>';
+  const imgEl = p.img
+    ? `<img class="tok-img" src="${esc(p.img)}" alt="" onerror="this.outerHTML='<div class=&quot;tok-img ph&quot;>${esc((p.symbol||'?')[0])}</div>'">`
+    : `<div class="tok-img ph">${esc((p.symbol||'?')[0])}</div>`;
+  const short = p.tokenAddr.slice(0,6)+'…'+p.tokenAddr.slice(-4);
+  return `
+  <div class="card ${cls}">
+    <div class="stamp ${cls}">${p.verdict}</div>
+    <div class="top">
+      ${imgEl}
+      <div class="tok-name">
+        <div class="sym">$${esc(p.symbol)}</div>
+        <div class="nm">${esc(p.name)}</div>
+      </div>
+      <div class="badges">${bankrBadge}<span class="badge age">${fmtAge(a.pool_created_at)} old</span></div>
+    </div>
+    <div class="score-label"><span>degen score</span><b>${p.score}/100</b></div>
+    <div class="scorebar"><i style="width:${p.score}%"></i></div>
+    <div class="stats">
+      <div class="stat"><div class="k">liquidity</div><div class="v">${fmtUsd(a.reserve_in_usd)}</div></div>
+      <div class="stat"><div class="k">fdv</div><div class="v">${fmtUsd(a.fdv_usd)}</div></div>
+      <div class="stat"><div class="k">vol 1h</div><div class="v">${fmtUsd(a.volume_usd?.h1)}</div></div>
+      <div class="stat"><div class="k">1h change</div><div class="v ${chg1>=0?'up':'down'}">${isFinite(chg1)?(chg1>=0?'+':'')+chg1.toFixed(1)+'%':'—'}</div></div>
+    </div>
+    <div class="reasons">
+      ${p.reasons.map(r => `<div class="reason ${r.good?'good':'bad'}"><span class="ic">${r.good?'+':'−'}</span>${esc(r.txt)}</div>`).join('')}
+    </div>
+    <div class="ca" data-addr="${esc(p.tokenAddr)}" title="copy contract address">
+      <span>CA</span><span class="addr">${short}</span><span>⧉</span>
+    </div>
+    <div class="links">
+      <a class="lnk primary" target="_blank" rel="noopener" href="https://www.geckoterminal.com/robinhood/pools/${esc(p.poolAddr)}">Chart</a>
+      <a class="lnk" target="_blank" rel="noopener" href="https://robinhoodchain.blockscout.com/token/${esc(p.tokenAddr)}">Explorer</a>
+    </div>
+  </div>`;
+}
+
+// ---------- Loop ----------
+async function refresh(){
+  try{
+    setStatus('scanning…');
+    pools = await fetchNewPools();
+    render();
+    setStatus('live · updated ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
+    resolveCreators(pools); // async, re-renders as badges resolve
+  }catch(e){
+    setStatus('fetch failed — retrying', true);
+    if(!pools.length) feed.innerHTML = `<div class="empty">couldn't reach GeckoTerminal — will retry in ${REFRESH_MS/1000}s</div>`;
+  }
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(refresh, REFRESH_MS);
+}
+
+learnBankrFingerprint().finally(refresh);
+})();
+</script>
+</body>
+</html>
